@@ -5,7 +5,7 @@
 from flask import Flask
 from flask_cors import CORS
 from flask_talisman import Talisman
-
+import asyncio
 from api import exception_views
 from api.messages import messages_views
 from api.chats import chats_views
@@ -16,7 +16,7 @@ from api.security.auth0_service import auth0_service
 from common.utils import safe_get_env_var
 
 
-def create_app():
+def create_app(host='0.0.0.0'):
     ##########################################
     # Environment Variables
     ##########################################
@@ -69,7 +69,7 @@ def create_app():
         app,
         resources={r"/api/*": {"origins": client_origin_url}},
         allow_headers=["Authorization", "Content-Type"],
-        methods=["GET"],
+        methods=["GET", "POST"],
         max_age=86400
     )
 

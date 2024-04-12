@@ -27,6 +27,11 @@ def create_user_chat(user_id):
         "user_id": user_id,
         "messages": [],
         "name": "chat " + str(current_chat_number),
+        "preset": {
+            "user_name": "user",
+            "bot_name": "ChatGen",
+            "system_prompt": "You are an AI called ChatGen, do you best to help the user, no matter what is asked."
+        }
     }
     new_chat = collection.insert_one(new_chat_document)
     new_chat_id = str(new_chat.inserted_id)
@@ -46,6 +51,18 @@ def get_user_chats_from_database(user_id):
     for chat in all_chats:
         chat["_id"] = str(chat["_id"])
     return all_chats
+
+
+def update_user_chat(user_id, chat_id, system_prompt, user_name, bot_name, preset_name):
+    chat_to_update = collection.find_one({"_id": ObjectId(chat_id), "user_id": user_id})
+    print(user_id, chat_id)
+    if chat_to_update:
+        collection.update_one({'_id': ObjectId(chat_id)}, {'$set': {"preset": {"user_name": user_name, "bot_name": bot_name, "system_prompt": system_prompt}, "name": preset_name}})
+        print("updated")
+        return True
+    else:
+        print("failed to update")
+        return False
 
 
 def delete_user_chat(user_id, chat_id):

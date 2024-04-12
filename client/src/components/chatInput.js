@@ -13,13 +13,16 @@ const ChatInput = ({ sendMessage }) => {
       <div className=" flex gap-2 p-4 w-full">
         <div className=" flex w-full">
           <select
+            value={"user"}
             onChange={(e) => setMessageType(e.target.value)}
             className="select rounded-r-none w-[100px] outline-none border-none max-w-xs bg-slate-700 mr-0 pr-0"
           >
-            <option selected>User</option>
-            <option>System</option>
-            <option>Bot</option>
-            <option>World</option>
+            <option value={"user"} defaultValue={"user"}>
+              User
+            </option>
+            <option value={"system"}>System</option>
+            <option value={"bot"}>Bot</option>
+            <option value={"world"}>World</option>
           </select>
           <input
             value={messageValue}

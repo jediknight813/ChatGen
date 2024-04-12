@@ -61,6 +61,33 @@ export const getAllThreadMessages = async (accessToken, thread_id) => {
   };
 };
 
+export const addUserMessageToThread = async (
+  accessToken,
+  thread_id,
+  message,
+  messageType
+) => {
+  const config = {
+    url: `${apiServerUrl}/api/threads/add_user_message_to_thread`,
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    data: {
+      thread_id: thread_id,
+      message: message,
+      messageType: messageType,
+    },
+  };
+
+  const { data, error } = await callExternalApi({ config });
+  return {
+    data: data || null,
+    error,
+  };
+};
+
 export const getStreamingMessage = async (accessToken, thread_id) => {
   const config = {
     url: `${apiServerUrl}/api/threads/get_streaming_message`,

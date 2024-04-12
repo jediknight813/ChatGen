@@ -1,4 +1,5 @@
 from flask import Blueprint, g, request, jsonify
+import asyncio
 
 from api.pymongo_database.thread.thread_functions import (
     get_chat_threads_from_database,
@@ -6,6 +7,7 @@ from api.pymongo_database.thread.thread_functions import (
     delete_user_thread,
     get_thread_messages,
     get_thread_streaming_message,
+    add_message_to_thread
 )
 from api.security.guards import (
     authorization_guard,
@@ -34,8 +36,26 @@ def get_streaming_message():
     data = request.get_json()
     user_id = g.user_data
     thread_id = data.get("thread_id")
-    thread = get_thread_streaming_message(thread_id, user_id)
-    return {"message": thread}
+    message = get_thread_streaming_message(thread_id, user_id)
+    return {"message": message}
+
+
+@bp.route("/add_user_message_to_thread", methods=["POST"])
+@authorization_guard
+def add_user_message_to_thread():
+    data = request.get_json()
+    user_id = g.user_data
+    thread_id = data.get("thread_id")
+    message = data.get("message")
+    messageType = data.get("messageType")
+    messageType = messageType.lower()
+    new_message = {
+        "type": messageType,
+        "message": message,
+        "streaming": False
+    }
+    final_message = add_message_to_thread(thread_id, new_message, user_id)
+    return {"message": final_message}
 
 
 @bp.route("/get_all_thread_messages", methods=["POST"])
@@ -54,6 +74,7 @@ def get_chat_threads():
     data = request.get_json()
     user_id = g.user_data
     chat_id = data.get("chat_id")
+    chat_id = str(chat_id)
     thread = get_chat_threads_from_database(user_id, chat_id)
     return {"message": thread}
 

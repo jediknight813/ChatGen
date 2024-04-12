@@ -4,6 +4,7 @@ from api.pymongo_database.chat.chat_functions import (
     get_user_chats_from_database,
     create_user_chat,
     delete_user_chat,
+    update_user_chat
 )
 
 from api.security.guards import (
@@ -42,6 +43,20 @@ def get_user_chats():
 def create_chat():
     user_data = g.user_data
     new_chat = create_user_chat(user_data)
+    return {"message": new_chat}
+
+
+@bp.route("/edit_chat", methods=["POST"])
+@authorization_guard
+def edit_chat():
+    data = request.get_json()
+    user_data = g.user_data
+    chat_id = data.get("chat_id")
+    system_prompt = data.get("system_prompt")
+    user_name = data.get("user_name")
+    bot_name = data.get("bot_name")
+    preset_name = data.get("preset_name")
+    new_chat = update_user_chat(user_data, chat_id, system_prompt, user_name, bot_name, preset_name)
     return {"message": new_chat}
 
 

@@ -29,6 +29,13 @@ def add_message_to_thread(thread_id, message, user_id):
     else:
         return message
 
+def get_user_chat_preset(user_id, chat_id):
+    collection = db["Chats"]
+    test = collection.find_one({"_id": ObjectId(chat_id), "user_id": user_id})
+    if test:
+        return test["preset"]
+    else:
+        return {}
 
 def get_thread_messages(thread_id, user_id):
     collection = db['Threads']

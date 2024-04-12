@@ -11,6 +11,7 @@ const ChatSidebar = ({
   createThread,
   threads,
   deleteChatThread,
+  setChatPresetToEdit,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
@@ -39,6 +40,14 @@ const ChatSidebar = ({
       setChatToDeleteId(chatId);
     };
 
+    const editChatPrest = () => {
+      var value = chat["preset"];
+      value["name"] = chat["name"];
+      value["chat_id"] = chat["_id"];
+      setChatPresetToEdit(value);
+      document.getElementById("editChatPreset").showModal();
+    };
+
     return (
       <div
         className={`w-full items-start flex justify-between rounded-lg hover:bg-slate-800 p-3 ${
@@ -47,16 +56,24 @@ const ChatSidebar = ({
       >
         <h1
           onClick={() => navigate("/" + chat._id)}
-          className=" self-center text-centers cursor-pointer"
+          className=" self-center text-centers cursor-pointer line-clamp-1"
         >
           {chat.name}
         </h1>
-        <button
-          onClick={() => CheckIfDeleteUserChat(chat._id)}
-          className=" btn relative btn-sm btn-error text-white"
-        >
-          <i class="fa fa-trash"></i>
-        </button>
+        <div className=" flex gap-2">
+          <button
+            onClick={() => editChatPrest()}
+            className=" btn relative btn-sm btn-primary text-white"
+          >
+            <i className="fa fa-edit"></i>
+          </button>
+          <button
+            onClick={() => CheckIfDeleteUserChat(chat._id)}
+            className=" btn relative btn-sm btn-error text-white"
+          >
+            <i className="fa fa-trash"></i>
+          </button>
+        </div>
       </div>
     );
   };
@@ -75,7 +92,7 @@ const ChatSidebar = ({
       >
         <h1
           onClick={() => navigate("/" + thread.chat_id + "/" + thread._id)}
-          className=" self-center text-centers cursor-pointer"
+          className=" self-center text-centers cursor-pointer line-clamp-1"
         >
           {thread.name}
         </h1>
@@ -92,11 +109,11 @@ const ChatSidebar = ({
   return (
     <>
       <div
-        className={`flex ease-in-out duration-300 z-5 ${
-          isOpen ? " -translate-x-[88%] hidden" : ""
+        className={`flex ease-in-out duration-300  z-5 ${
+          isOpen ? " -translate-x-[88%] hidden" : " absolute md:relative"
         }`}
       >
-        <div className="w-[300px] h-full bg-black bg-opacity-90 flex items-start justify-start text-white">
+        <div className="w-[300px] h-full bg-black bg-opacity-90 min-h-screen flex items-start justify-start text-white">
           <div className=" pl-6 pt-4 pr-6 flex flex-col items-start h-full gap-4 w-full">
             <div className=" flex w-full items-center justify-between">
               <h1 className="font-bold text-xl">Presets</h1>
@@ -111,20 +128,26 @@ const ChatSidebar = ({
             {chats.map((chat, index) => (
               <Chat key={index} chat={chat} index={index} />
             ))}
-            {/* threads section */}
-            <div className=" flex  w-full items-start justify-between">
-              <h1 className="font-bold text-xl">Threads</h1>
-              <button
-                onClick={() => createThread()}
-                className=" btn btn-primary btn-sm text-white hover:btn-primary hover:bg-opacity-80 hover:text-white"
-              >
-                Create
-              </button>
-            </div>
-            {/* map and show all user threads. */}
-            {threads.map((thread, index) => (
-              <Thread key={index} thread={thread} index={index} />
-            ))}
+
+            {chatId && (
+              <>
+                {/* threads section */}
+                <div className=" flex  w-full items-start justify-between">
+                  <h1 className="font-bold text-xl">Threads</h1>
+                  <button
+                    onClick={() => createThread()}
+                    className=" btn btn-primary btn-sm text-white hover:btn-primary hover:bg-opacity-80 hover:text-white"
+                  >
+                    Create
+                  </button>
+                </div>
+                {/* map and show all user threads. */}
+                {threads.map((thread, index) => (
+                  <Thread key={index} thread={thread} index={index} />
+                ))}
+              </>
+            )}
+
             {/* settings modal */}
             {chatId !== undefined && (
               <div

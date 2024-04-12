@@ -47,7 +47,7 @@ def create_chat_thread(user_id, chat_id):
     }
     new_thread = collection.insert_one(new_thread_document)
     new_thread_id = str(new_thread.inserted_id)
-    return {"_id": new_thread_id, "user_id": user_id, "messages": [], "name": "Thread #" + str(current_thread_number), "chat_id": "chat_id"}
+    return {"_id": new_thread_id, "user_id": user_id, "messages": [], "name": "Thread #" + str(current_thread_number), "chat_id": str(chat_id)}
 
 
 def get_chat_threads_from_database(user_id, chat_id):
@@ -70,11 +70,27 @@ def delete_user_thread(user_id, thread_id):
 
 
 def get_thread_streaming_message(thread_id, user_id):
-    collection = db['Threads']
     thread = collection.find_one({'_id': ObjectId(thread_id), 'user_id': user_id})
     if thread:
         for msg in thread['messages']:
-            if str(msg['streaming']) == True:
+            if msg['streaming'] == True:
                 return msg
     else:
         return "no message is streaming"
+
+
+def add_message_to_thread(thread_id, message, user_id):
+    collection = db["Threads"]
+    thread_to_update = collection.find_one({"_id": ObjectId(thread_id), "user_id": user_id})
+    if thread_to_update:
+        messages = thread_to_update.get('messages', [])
+        message_id = str(uuid.uuid4())
+        message["_id"] = message_id
+        messages.append(message)
+        collection.update_one(
+            {"_id": ObjectId(thread_id), "user_id": user_id},
+            {"$set": {"messages": messages}}
+        )
+        return message
+    else:
+        return message

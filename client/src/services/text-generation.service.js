@@ -34,3 +34,89 @@ export const getReponseToUser = async (
     error,
   };
 };
+
+export const getModels = async (accessToken) => {
+  const config = {
+    url: `${apiServerUrl}/api/text_generation/get_models`,
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  };
+
+  const { data, error } = await callExternalApi({ config });
+
+  return {
+    data: data ? data.message : null,
+    error,
+  };
+};
+
+export const loadModel = async (
+  accessToken,
+  modelName,
+  gpuThreads,
+  ctxSize
+) => {
+  const config = {
+    url: `${apiServerUrl}/api/text_generation/load_model`,
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    data: {
+      modal_name: modelName,
+      gpu_threads: gpuThreads,
+      ctx_size: ctxSize,
+    },
+  };
+  const { data, error } = await callExternalApi({ config });
+  return {
+    data: data ? data.message : null,
+    error,
+  };
+};
+
+export const downloadModel = async (
+  accessToken,
+  authorName,
+  authorRepo,
+  authorModel
+) => {
+  const config = {
+    url: `${apiServerUrl}/api/text_generation/download_model`,
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    data: {
+      authorName: authorName,
+      authorRepo: authorRepo,
+      authorModel: authorModel,
+    },
+  };
+  const { data, error } = await callExternalApi({ config });
+  return {
+    data: data ? data.message : null,
+    error,
+  };
+};
+
+export const unloadModel = async (accessToken) => {
+  const config = {
+    url: `${apiServerUrl}/api/text_generation/unload_model`,
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  };
+  const { data, error } = await callExternalApi({ config });
+  return {
+    data: data ? data.message : null,
+    error,
+  };
+};

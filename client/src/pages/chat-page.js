@@ -31,6 +31,7 @@ const ChatPage = () => {
   const { chatId, threadId } = useParams();
   const { user } = useAuth0();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isEditChatModalOpen, setIsEditChatModalOpen] = useState(false);
   const [chatPresetToEdit, setChatPresetToEdit] = useState({
     name: "",
     system_prompt: "",
@@ -110,7 +111,6 @@ const ChatPage = () => {
       const { data, error } = await createUserChatThread(accessToken, chatId);
       if (data) {
         const newThread = data.message;
-        console.log(newThread);
         threads.push(newThread);
         setThreads([...threads]);
       }
@@ -170,7 +170,6 @@ const ChatPage = () => {
     );
     if (response && response.data) {
       const newMessage = response.data.message;
-      console.log(newMessage);
       currentThreadMessages.push(newMessage);
       setCurrentThreadMessages([...currentThreadMessages]);
     }
@@ -224,7 +223,7 @@ const ChatPage = () => {
 
   return (
     <>
-      <div className=" flex h-[95vh]">
+      <div className=" flex h-[95vh] max-w-screen overflow-x-hidden">
         <ChatSidebar
           deleteChat={deleteChat}
           createChat={createChat}
@@ -233,6 +232,7 @@ const ChatPage = () => {
           threads={threads}
           deleteChatThread={deleteUserChatThread}
           setChatPresetToEdit={setChatPresetToEdit}
+          setIsEditChatModalOpen={setIsEditChatModalOpen}
         />
 
         <div className=" flex flex-col w-full justify-between">
@@ -260,6 +260,7 @@ const ChatPage = () => {
                 messages={currentThreadMessages}
                 isGenerating={isGenerating}
                 threadId={threadId}
+                setIsGenerating={setIsGenerating}
               />
               <div className=" flex flex-col w-full">
                 <ChatInput sendMessage={sendMessage} />
@@ -274,6 +275,8 @@ const ChatPage = () => {
         setCurrentPresetData={setChatPresetToEdit}
         currentPresetData={chatPresetToEdit}
         modal_name={"editChatPreset"}
+        isOpen={isEditChatModalOpen}
+        setIsOpen={setIsEditChatModalOpen}
       />
     </>
   );

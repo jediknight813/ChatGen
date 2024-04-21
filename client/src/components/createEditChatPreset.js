@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { updateUserChat } from "../services/chats.service";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useNavigate } from "react-router-dom";
 
 const CreateEditChatPreset = ({
   form_type,
@@ -8,10 +9,13 @@ const CreateEditChatPreset = ({
   modal_name,
   currentPresetData,
   setCurrentPresetData,
+  isOpen,
+  setIsOpen,
 }) => {
   const updateChatPreset = () => {
     getChatThreads();
   };
+  const navigate = useNavigate();
 
   const { getAccessTokenSilently } = useAuth0();
   const getChatThreads = async () => {
@@ -25,20 +29,21 @@ const CreateEditChatPreset = ({
         currentPresetData["bot_name"],
         currentPresetData["name"]
       );
-      console.log(data, error);
+      navigate("/");
     }
   };
 
   return (
-    <dialog
-      id={modal_name}
-      className="modal md:w-auto items-center justify-center h-full w-full flex"
+    <div
+      className={`w-full h-full fixed top-0 flex justify-center items-center bg-slate-950 bg-opacity-70 text-white ${
+        isOpen ? " " : " hidden"
+      }`}
     >
-      <div className="modal-box text-white flex flex-col gap-3 max-w-[98vw] self-center">
+      <div className="p-8 rounded-lg w-[95%] md:w-[600px] scrollbar-track-transparent scrollbar md:scrollbar-none bg-black flex max-h-[95%] overflow-y-scroll flex-col gap-4 items-center">
         <h3 className="font-bold text-xl w-full text-center">Edit Preset</h3>
 
         {/* preset name */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 w-full">
           <h1 className=" ml-1 font-bold">Chat Preset Name</h1>
           <input
             value={currentPresetData["name"]}
@@ -54,7 +59,7 @@ const CreateEditChatPreset = ({
         </div>
 
         {/* player name */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 w-full">
           <h1 className=" ml-1 font-bold">Player Name</h1>
           <input
             value={currentPresetData["user_name"]}
@@ -70,7 +75,7 @@ const CreateEditChatPreset = ({
         </div>
 
         {/* bot name */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 w-full">
           <h1 className=" ml-1 font-bold">Bot Name</h1>
           <input
             value={currentPresetData["bot_name"]}
@@ -86,7 +91,7 @@ const CreateEditChatPreset = ({
         </div>
 
         {/* system prompt */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 w-full">
           <h1 className=" ml-1 font-bold">System Prompt</h1>
           <textarea
             value={currentPresetData["system_prompt"]}
@@ -101,19 +106,22 @@ const CreateEditChatPreset = ({
           />
         </div>
 
-        <form method="dialog w-full gap-3 flex flex-col">
+        <div className="w-full gap-3 flex flex-col">
           <button
             onClick={() => updateChatPreset()}
             className="btn btn-primary mb-5 mt-2 text-white w-full"
           >
             Update
           </button>
-          <button className="btn btn-secondary font-bold text-white w-full">
+          <button
+            onClick={() => setIsOpen(false)}
+            className="btn btn-secondary font-bold text-white w-full"
+          >
             Close
           </button>
-        </form>
+        </div>
       </div>
-    </dialog>
+    </div>
   );
 };
 

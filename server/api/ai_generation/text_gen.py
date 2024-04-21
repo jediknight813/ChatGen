@@ -22,6 +22,21 @@ def command_r_format(lm, system_prompt):
     lm += system_prompt + gen(max_tokens=2000, stop="<|END_OF_TURN_TOKEN|>", name='response')
     return lm
 
+@guidance
+def alpaca_format(lm, system_prompt):
+    lm += system_prompt + gen(max_tokens=2000, stop="### Input:", name='response')
+    return lm
+
+@guidance
+def vicuna_format(lm, system_prompt):
+    lm += system_prompt + gen(max_tokens=2000, stop="USER:", name='response')
+    return lm
+
+
+@guidance
+def llama_3_format(lm, system_prompt):
+    lm += system_prompt + gen(max_tokens=2000, stop="assistant", name='response')
+    return lm
 def create_chat_history_string(messages, user_prefix="", bot_prefix="", user_end_token="", bot_end_token="", split="\n", system_prefix="", world_prefix=""):
     chat_history_string = ""
     if len(messages) >= 1:
@@ -63,6 +78,20 @@ def create_chat_history_string(messages, user_prefix="", bot_prefix="", user_end
     return chat_history_string
 
 
+def format_alpaca_prompt(system_prompt, messages, user_name, bot_name):
+    full_prompt = ""
+    full_prompt += "### Instruction:" + system_prompt
+    full_prompt += create_chat_history_string(messages, " ### Input: "+user_name+": ", " ### Response: "+bot_name+": ", "", "### Input:", "", " ### Input: System: ", " ### Input: World: ")
+    return full_prompt
+
+
+def format_vicuna_prompt(system_prompt, messages, user_name, bot_name):
+    full_prompt = ""
+    full_prompt += "SYSTEM: " + system_prompt
+    full_prompt += create_chat_history_string(messages, " USER: "+user_name+": ", " ASSISTANT: "+bot_name+": ", "", "USER: ", "", " USER:\n System: ", " USER:\n World: ")
+    return full_prompt
+
+
 def format_mixtral_prompt(system_prompt, messages, user_name, bot_name):
     full_prompt = ""
     # add system prompt
@@ -70,7 +99,7 @@ def format_mixtral_prompt(system_prompt, messages, user_name, bot_name):
     # system_prompt = f"[INST] You are a chatbot called ChatGen. [/INST]ChatGen:Model answer</s> [INST] tell me a joke [/INST] ChatGen:"
     # add the message history to the prompt.
     full_prompt += create_chat_history_string(messages, " [INST] "+user_name+": ", " [/INST] "+bot_name+": ", "", "</s>", "", " [INST] System: ", " [INST] World: ")
-    print(full_prompt)
+    # print(full_prompt)
     return full_prompt
 
 def format_command_r_prompt(system_prompt, messages, user_name, bot_name):
@@ -78,6 +107,16 @@ def format_command_r_prompt(system_prompt, messages, user_name, bot_name):
     full_prompt = ""
     full_prompt += "<BOS_TOKEN> " + system_prompt
     full_prompt += create_chat_history_string(messages, " <|START_OF_TURN_TOKEN|><|USER_TOKEN|> "+user_name+": ", " <|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|> "+bot_name+": ", "<|END_OF_TURN_TOKEN|>", "<|END_OF_TURN_TOKEN|>", "", " <|START_OF_TURN_TOKEN|><|USER_TOKEN|> System: ", " <|START_OF_TURN_TOKEN|><|USER_TOKEN|> World: ")
+    # print(full_prompt)
+    return full_prompt
+
+
+def format_llama_3_prompt(system_prompt, messages, user_name, bot_name):
+    # temp fix with this model, may be changed in future.
+    # <|eot_id|>
+    full_prompt = ""
+    full_prompt += "<|begin_of_text|><|start_header_id|>system<|end_header_id|> \n" + system_prompt + "<|eot_id|>"
+    full_prompt += create_chat_history_string(messages, "<|start_header_id|>user<|end_header_id|>\n","<|start_header_id|>assistant<|end_header_id|>\n", "<|eot_id|>\n", "<|eot_id|>\n", "", "<|start_header_id|>system<|end_header_id|>\n", "<|start_header_id|>assistant<|end_header_id|>\n")
     print(full_prompt)
     return full_prompt
 
@@ -111,7 +150,7 @@ async def generate_response(chat_id, user_id, thread_id, prompt_format, message_
     response = ""
     streaming_message =  {
         "type": "bot",
-        "message": message,
+        "message": "",
         "streaming": True
     }
     message_to_update = add_message_to_thread(thread_id, streaming_message, user_id)
@@ -123,13 +162,18 @@ async def generate_response(chat_id, user_id, thread_id, prompt_format, message_
     if prompt_format == "mixtral":
         thread_prompt = format_mixtral_prompt(preset_data["system_prompt"], thread_messages, preset_data["user_name"], preset_data["bot_name"])
         response = stream_response(mixtral_format, thread_prompt, thread_id, user_id, message_to_update)
-        print(response)
     if prompt_format == "command-r":
         thread_prompt = format_command_r_prompt(preset_data["system_prompt"], thread_messages, preset_data["user_name"], preset_data["bot_name"])
         response = stream_response(mixtral_format, thread_prompt, thread_id, user_id, message_to_update)
+    if prompt_format == "alpaca":
+        thread_prompt = format_alpaca_prompt(preset_data["system_prompt"], thread_messages, preset_data["user_name"], preset_data["bot_name"])
+        response = stream_response(alpaca_format, thread_prompt, thread_id, user_id, message_to_update)
+    if prompt_format == "vicuna":
+        thread_prompt = format_vicuna_prompt(preset_data["system_prompt"], thread_messages, preset_data["user_name"], preset_data["bot_name"])
+        response = stream_response(vicuna_format, thread_prompt, thread_id, user_id, message_to_update)
+    if prompt_format == "llama-3":
+        thread_prompt = format_llama_3_prompt(preset_data["system_prompt"], thread_messages, preset_data["user_name"], preset_data["bot_name"])
+        response = stream_response(llama_3_format, thread_prompt, thread_id, user_id, message_to_update)
 
     final_message = update_message_in_thread(thread_id, user_id, False, response, message_to_update["_id"])
     return final_message
-
-
-# generate_response("6615c56a9b9c79c739377f72", "google-oauth2|113315294171159017171", "6615c56a9b9c79c739377f73", "mixtral", "user", "bob the builder.")

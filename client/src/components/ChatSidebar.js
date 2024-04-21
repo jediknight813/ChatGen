@@ -12,6 +12,7 @@ const ChatSidebar = ({
   threads,
   deleteChatThread,
   setChatPresetToEdit,
+  setIsEditChatModalOpen,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
@@ -45,7 +46,7 @@ const ChatSidebar = ({
       value["name"] = chat["name"];
       value["chat_id"] = chat["_id"];
       setChatPresetToEdit(value);
-      document.getElementById("editChatPreset").showModal();
+      setIsEditChatModalOpen(true);
     };
 
     return (
@@ -113,7 +114,7 @@ const ChatSidebar = ({
           isOpen ? " -translate-x-[88%] hidden" : " absolute md:relative"
         }`}
       >
-        <div className="w-[300px] h-full bg-black bg-opacity-90 min-h-screen flex items-start justify-start text-white">
+        <div className="w-[300px] h-full bg-black bg-opacity-90 min-h-screen md:min-h-full flex items-start justify-start text-white">
           <div className=" pl-6 pt-4 pr-6 flex flex-col items-start h-full gap-4 w-full">
             <div className=" flex w-full items-center justify-between">
               <h1 className="font-bold text-xl">Presets</h1>
@@ -171,7 +172,7 @@ const ChatSidebar = ({
 
       {isOpen && (
         <button
-          className="bg-black h-12 mt-12 pl-3 z-0 rounded-r-3xl pr-3 fixed text-white md:hidden"
+          className="bg-black h-12  mt-5 pl-3 z-0 rounded-r-3xl pr-3 fixed text-white md:hidden"
           onClick={() => setIsOpen(!isOpen)}
         >
           >
